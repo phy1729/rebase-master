@@ -12,8 +12,7 @@ branches=$(git branch | sed -e 's/[*]//' -e '/master/d' -e '/(no branch, rebasin
 
 for branch in $branches; do
 	echo -n "Rebasing $branch "
-	git rebase master "$branch" 1>/dev/null 2>&1
-	if [ $? -eq 0 ]; then
+	if git rebase master "$branch" 1>/dev/null 2>&1; then
 		tput setaf 2
 		echo "(ok)"
 		tput sgr0
