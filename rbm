@@ -36,7 +36,7 @@ elif [ ${#failed_branches[@]} -eq 1 ]; then
 	fi
 	case "$resp" in
 		Y*|y*)
-			git rebase -i master ${failed_branches[0]}
+			git rebase -i master "${failed_branches[0]}"
 			;;
 		N*|n*)
 			break;
@@ -44,5 +44,5 @@ elif [ ${#failed_branches[@]} -eq 1 ]; then
 	esac
 else
 	# TODO: Select repo to rebase
-	echo ${failed_branches[@]}
+	echo "${failed_branches[@]}"
 fi
