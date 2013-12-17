@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# Check for unstaged changes
+# TODO: Check only for unstaged changes not uncommitted
+if [ -n "$(git status --porcelain -uno)" ]; then
+	echo "Commit or stash changes before rebase."
+fi
+
+exit 0
+
+branches=$(git branch | tr -d '* ' | sed '/master/d' | sed '/(no branch, rebasing/d' | sed '/(detached from /d')
+
+for branch in $branches; do
+	echo -n "Rebasing $branch "
+	git rebase master "$branch" 1>/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+		tput setaf 2
+		echo "(ok)"
+		tput sgr0
+	else
+		git rebase --abort
+		tput setaf 1
+		echo "(failed)"
+		tput sgr0
+		failed_branches=("${failed_branches[@]}" "$branch")
+	fi
+done
+
+if [ ${#failed_branches[@]} -eq 0 ]; then
+	exit 0;
+elif [ ${#failed_branches[@]} -eq 1 ]; then
+	# If only one branch failed to rebase, offer to rebase interactively
+	read -p "Rebase ${failed_branches[0]} interactively? [y/N] " resp
+	if [ -z "$resp" ]; then
+		resp=n
+	fi
+	case "$resp" in
+		Y*|y*)
+			git rebase -i master ${failed_branches[0]}
+			;;
+		N*|n*)
+			exit
+			;;
+	esac
+else
+	# TODO: Select repo to rebase
+	echo ${failed_branches[@]}
+fi
