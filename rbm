@@ -6,7 +6,7 @@ if [ -n "$(git status --porcelain -uno)" ]; then
 	echo "Commit or stash changes before rebase."
 fi
 
-branches=$(git branch | tr -d '* ' | sed '/master/d' | sed '/(no branch, rebasing/d' | sed '/(detached from /d')
+branches=$(git branch | sed -e 's/[*]//' -e '/master/d' -e '/(no branch, rebasing/d' -e '/(detached from /d')
 
 for branch in $branches; do
 	echo -n "Rebasing $branch "
