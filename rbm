@@ -6,6 +6,7 @@ orig_branch=$(git branch | sed -e '/^*/!d' -e 's/\* //')
 # TODO: Check only for unstaged changes not uncommitted
 if [ -n "$(git status --porcelain -uno)" ]; then
 	echo "Commit or stash changes before rebase."
+	exit 1
 fi
 
 branches=$(git branch | sed -e 's/[*]//' -e '/master/d' -e '/(no branch, rebasing/d' -e '/(detached from /d')
