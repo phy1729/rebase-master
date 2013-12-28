@@ -39,10 +39,11 @@ elif [ ${#failed_branches[@]} -eq 1 ]; then
 			git rebase -i master "${failed_branches[0]}"
 			;;
 		N*|n*)
-			break;
+			git checkout "$orig_branch"
 			;;
 	esac
 else
 	# TODO: Select repo to rebase
 	echo "${failed_branches[@]}"
+	git checkout "$orig_branch"
 fi
