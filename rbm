@@ -1,5 +1,39 @@
 #!/usr/bin/env bash
 
+show_help() {
+	cat << EOF
+Usage: ${0##*/} -h
+       ${0##*/} [-o <newbase>] [-u <upstream>]
+For all branches run  git rebase <upstream> <branch> [--onto <newbase>]
+Use master for upstream if non is provided.
+EOF
+}
+
+newbase=""
+upstream="master"
+
+while getopts ":ho:u:" opt; do
+	case "$opt" in
+		h)
+			show_help
+			exit 0
+			;;
+		o) newbase=$OPTARG
+			;;
+		u) upstream=$OPTARG
+			;;
+		\?)
+			echo "Invalid option: -$OPTARG" >&2
+			exit 1
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument." >&2
+			exit 1
+			;;
+	esac
+done
+shift "$((OPTIND-1))"
+
 orig_branch=$(git branch | sed -e '/^*/!d' -e 's/\* //')
 
 # Check for unstaged changes
@@ -9,11 +43,13 @@ if [ -n "$(git status --porcelain -uno)" ]; then
 	exit 1
 fi
 
-branches=$(git branch | sed -e 's/[*]//' -e '/master/d' -e '/(no branch, rebasing/d' -e '/(detached from /d')
+branches=$(git branch | sed -e 's/[*]//' -e '/master/d' -e '/(no branch, rebasing/d' -e '/(detached from /d' -e "/${upstream}/d" -e "/${newbase}/d")
 
 for branch in $branches; do
 	echo -n "Rebasing $branch "
-	if git rebase master "$branch" 1>/dev/null 2>&1; then
+	args=( rebase "$upstream" "$branch" )
+	[ -n "$newbase" ] && args+=( --onto "$newbase" )
+	if git "${args[@]}" 1>/dev/null 2>&1; then
 		tput setaf 2
 		echo "(ok)"
 		tput sgr0
