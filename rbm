@@ -35,6 +35,7 @@ shift "$((OPTIND-1))"
 
 orig_branch="$(git rev-parse --abbrev-ref @)"
 [ "$orig_branch" = HEAD ] && orig_branch="$(git rev-parse @)"
+[ -n "$newbase" ] || newbase="$upstream"
 
 # Check for unstaged changes
 # TODO: Check only for unstaged changes not uncommitted
@@ -50,9 +51,7 @@ for branch in $branches; do
 	[ "$branch" = "$upstream" ] && continue
 	[ "$branch" = "$newbase" ] && continue
 	echo -n "Rebasing $branch "
-	args=( rebase "$upstream" "$branch" )
-	[ -n "$newbase" ] && args+=( --onto "$newbase" )
-	if git "${args[@]}" 1>/dev/null 2>&1; then
+	if git rebase "$upstream" "$branch" --onto "$newbase" >/dev/null 2>&1; then
 		tput setaf 2 0 0
 		echo "(ok)"
 		tput sgr0
