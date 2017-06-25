@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 
 show_help() {
-	cat << EOF
-Usage: ${0##*/} -h
-       ${0##*/} [-o <newbase>] [-u <upstream>]
-For all branches run  git rebase <upstream> <branch> [--onto <newbase>]
-Use master for upstream if non is provided.
+	cat <<-'EOF'
+		Usage: rbm [-o <newbase>] [-u <upstream>]
+		For all branches run  git rebase <upstream> <branch> [--onto <newbase>]
+		Use master for upstream if non is provided.
 EOF
 }
 
