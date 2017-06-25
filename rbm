@@ -8,8 +8,8 @@ show_help() {
 EOF
 }
 
-newbase=""
-upstream="master"
+newbase=
+upstream=master
 failed_branches=
 failed_branches_num=0
 
@@ -42,7 +42,7 @@ orig_branch="$(git rev-parse --abbrev-ref @)"
 # Check for unstaged changes
 # TODO: Check only for unstaged changes not uncommitted
 if [ -n "$(git status --porcelain -uno)" ]; then
-	echo "Commit or stash changes before rebase."
+	echo >&2 'Commit or stash changes before rebase.'
 	exit 1
 fi
 
@@ -52,15 +52,15 @@ for branch in $branches; do
 	branch="${branch#refs/heads/}"
 	[ "$branch" = "$upstream" ] && continue
 	[ "$branch" = "$newbase" ] && continue
-	echo -n "Rebasing $branch "
+	printf 'Rebasing %s ' "$branch"
 	if git rebase "$upstream" "$branch" --onto "$newbase" >/dev/null 2>&1; then
 		tput setaf 2 0 0
-		echo "(ok)"
+		echo '(ok)'
 		tput sgr0
 	else
 		git rebase --abort
 		tput setaf 1 0 0
-		echo "(failed)"
+		echo '(failed)'
 		tput sgr0
 		: "$(( failed_branches_num+=1 ))"
 		failed_branches="$failed_branches $branch"
@@ -72,10 +72,7 @@ if [ $failed_branches_num -eq 0 ]; then
 elif [ $failed_branches_num -eq 1 ]; then
 	# If only one branch failed to rebase, offer to rebase interactively
 	read -p "Rebase $failed_branches interactively? [y/N] " resp
-	if [ -z "$resp" ]; then
-		resp=n
-	fi
-	case "$resp" in
+	case "${resp:-n}" in
 		Y*|y*)
 			git rebase -i master "$failed_branches"
 			;;
@@ -85,6 +82,6 @@ elif [ $failed_branches_num -eq 1 ]; then
 	esac
 else
 	# TODO: Select repo to rebase
-	echo "$failed_branches"
+	printf '%s\n' "$failed_branches"
 	git checkout "$orig_branch"
 fi
