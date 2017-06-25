@@ -84,5 +84,5 @@ elif [ $failed_branches_num -eq 1 ]; then
 else
 	# TODO: Select repo to rebase
 	printf '%s\n' "$failed_branches"
-	git checkout "$orig_branch"
+	git checkout -q "$orig_branch"
 fi
