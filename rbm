@@ -71,7 +71,8 @@ if [ $failed_branches_num -eq 0 ]; then
 	git checkout "$orig_branch"
 elif [ $failed_branches_num -eq 1 ]; then
 	# If only one branch failed to rebase, offer to rebase interactively
-	read -p "Rebase $failed_branches interactively? [y/N] " resp
+	printf >&2 'Rebase %s interactively? [y/N] ' "$failed_branches"
+	read -r resp
 	case "${resp:-n}" in
 		Y*|y*)
 			git rebase -i master "$failed_branches"
