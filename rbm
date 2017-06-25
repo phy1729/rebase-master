@@ -10,6 +10,8 @@ EOF
 
 newbase=""
 upstream="master"
+failed_branches=
+failed_branches_num=0
 
 while getopts ":ho:u:" opt; do
 	case "$opt" in
@@ -60,21 +62,22 @@ for branch in $branches; do
 		tput setaf 1 0 0
 		echo "(failed)"
 		tput sgr0
-		failed_branches=("${failed_branches[@]}" "$branch")
+		: "$(( failed_branches_num+=1 ))"
+		failed_branches="$failed_branches $branch"
 	fi
 done
 
-if [ ${#failed_branches[@]} -eq 0 ]; then
+if [ $failed_branches_num -eq 0 ]; then
 	git checkout "$orig_branch"
-elif [ ${#failed_branches[@]} -eq 1 ]; then
+elif [ $failed_branches_num -eq 1 ]; then
 	# If only one branch failed to rebase, offer to rebase interactively
-	read -p "Rebase ${failed_branches[0]} interactively? [y/N] " resp
+	read -p "Rebase $failed_branches interactively? [y/N] " resp
 	if [ -z "$resp" ]; then
 		resp=n
 	fi
 	case "$resp" in
 		Y*|y*)
-			git rebase -i master "${failed_branches[0]}"
+			git rebase -i master "$failed_branches"
 			;;
 		N*|n*)
 			git checkout "$orig_branch"
@@ -82,6 +85,6 @@ elif [ ${#failed_branches[@]} -eq 1 ]; then
 	esac
 else
 	# TODO: Select repo to rebase
-	echo "${failed_branches[@]}"
+	echo "$failed_branches"
 	git checkout "$orig_branch"
 fi
