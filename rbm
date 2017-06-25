@@ -43,9 +43,12 @@ if [ -n "$(git status --porcelain -uno)" ]; then
 	exit 1
 fi
 
-branches=$(git branch | sed -e 's/[*]//' -e '/master/d' -e '/(no branch, rebasing/d' -e '/(detached from /d' -e "/${upstream}/d" -e "/${newbase}/d")
+branches="$(git for-each-ref --format='%(refname)' refs/heads 2>/dev/null)"
 
 for branch in $branches; do
+	branch="${branch#refs/heads/}"
+	[ "$branch" = "$upstream" ] && continue
+	[ "$branch" = "$newbase" ] && continue
 	echo -n "Rebasing $branch "
 	args=( rebase "$upstream" "$branch" )
 	[ -n "$newbase" ] && args+=( --onto "$newbase" )
