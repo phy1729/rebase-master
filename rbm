@@ -33,7 +33,8 @@ while getopts ":ho:u:" opt; do
 done
 shift "$((OPTIND-1))"
 
-orig_branch=$(git branch | sed -e '/^*/!d' -e 's/\* //')
+orig_branch="$(git rev-parse --abbrev-ref @)"
+[ "$orig_branch" = HEAD ] && orig_branch="$(git rev-parse @)"
 
 # Check for unstaged changes
 # TODO: Check only for unstaged changes not uncommitted
