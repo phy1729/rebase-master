@@ -79,10 +79,12 @@ elif [ $failed_branches_num -eq 1 ]; then
 			;;
 		N*|n*)
 			git checkout "$orig_branch"
+			exit 1
 			;;
 	esac
 else
 	# TODO: Select repo to rebase
 	printf '%s\n' "$failed_branches"
 	git checkout -q "$orig_branch"
+	exit 1
 fi
